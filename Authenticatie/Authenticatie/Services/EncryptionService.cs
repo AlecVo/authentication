@@ -12,7 +12,7 @@ namespace Authenticatie.Services
 {
     public interface IEncryption
     {
-        public string CreateToken(Bericht user);
+        public string CreateToken(Bericht bericht);
         public void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt);
     }
     public class EncryptionService : IEncryption
@@ -23,11 +23,11 @@ namespace Authenticatie.Services
         {
             _configuration = configuration;
         }
-        public string CreateToken(Bericht user)
+        public string CreateToken(Bericht bericht)
         {
             List<Claim> claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.BerichtInhoud)
+                new Claim(ClaimTypes.Name, bericht.BerichtInhoud)
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
@@ -45,12 +45,12 @@ namespace Authenticatie.Services
             return jwt;
         }
 
-        public void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        public void CreatePasswordHash(Bericht bericht, out byte[] passwordHash, out byte[] passwordSalt)
         {
             using (var hmac = new HMACSHA512())
             {
                 passwordSalt = hmac.Key; //public key
-                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password)); //gaat wachtwoord hashen
+                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(bericht)); //gaat wachtwoord hashen
             }
         }
     }
