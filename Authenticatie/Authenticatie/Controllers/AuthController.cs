@@ -23,26 +23,26 @@ namespace Authenticatie.Controllers
         }
 
 
-        [HttpPost("register")] //registreert persoon en hashed het wachtwoord
-        public async Task<ActionResult<User>> Register(UserDto request)
+        [HttpPost("Aanmaken Bericht")] //Maakt een bericht aan en hashed het.
+        public async Task<ActionResult<Bericht>> AanmakenBericht(BerichtDto request)
         {
-            _encryptionService.CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
-            User user = new User();
-            user.UserName = request.UserName;
-            user.PasswordHash = passwordHash;
-            user.PasswordSalt = passwordSalt;
+            _encryptionService.CreatePasswordHash(request.wachtwoord, out byte[] passwordHash, out byte[] passwordSalt);
+            Bericht bericht = new Bericht();
+            bericht.BerichtInhoud = request.berichtInhoud;
+            bericht.WachtwoordHash = passwordHash;
+            bericht.WachtwoordSalt = passwordSalt;
 
-            return Ok(user);
+            return Ok(bericht);
         }
 
         [HttpPost("Login")]// login zoekt op naam 
-        public async Task<ActionResult<string>> Login(UserDto request)
+        public async Task<ActionResult<string>> Login(BerichtDto request)
         {
             if (user.UserName != request.UserName)
             {
                 return BadRequest("User Not found.");
             }
-            if (!VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
+            if (!VerifyPasswordHash(request.wachtwoord, user.PasswordHash, user.PasswordSalt))
             {
                 return BadRequest("Password is wrong");
             }

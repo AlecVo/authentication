@@ -12,7 +12,7 @@ namespace Authenticatie.Services
 {
     public interface IEncryption
     {
-        public string CreateToken(User user);
+        public string CreateToken(Bericht user);
         public void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt);
     }
     public class EncryptionService : IEncryption
@@ -23,11 +23,11 @@ namespace Authenticatie.Services
         {
             _configuration = configuration;
         }
-        public string CreateToken(User user)
+        public string CreateToken(Bericht user)
         {
             List<Claim> claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.UserName)
+                new Claim(ClaimTypes.Name, user.BerichtInhoud)
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
