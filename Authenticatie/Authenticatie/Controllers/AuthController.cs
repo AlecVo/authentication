@@ -23,6 +23,18 @@ namespace Authenticatie.Controllers
 
             return Ok(user);
         }
+
+        [HttpPost("Login")]// login zoekt op naam 
+        public async Task<ActionResult<string>> Login(UserDto request)
+        {
+            if (user.UserName != request.UserName)
+            {
+                return BadRequest("User Not found.");
+            }
+
+            return Ok(token);
+        }
+
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
             using (var hmac = new HMACSHA512())
@@ -31,5 +43,6 @@ namespace Authenticatie.Controllers
                 passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
             }
         }
+        private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
     }
 }
