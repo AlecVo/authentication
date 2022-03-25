@@ -1,4 +1,5 @@
 ﻿using Authenticatie.Models;
+using Authenticatie.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -12,19 +13,21 @@ namespace Authenticatie.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        public static User user = new User();
-        private readonly IConfiguration _configuration;
+       
+        private IEncryption _encryptionService;
 
-        public AuthController(IConfiguration configuration)
+        public AuthController(IEncryption encryptionService)
         {
-            _configuration = configuration;
+            _encryptionService = encryptionService;
+
         }
+
 
         [HttpPost("register")] //registreert persoon en hashed het wachtwoord
         public async Task<ActionResult<User>> Register(UserDto request)
         {
-            CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
-
+            _encryptionService.CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
+            User user = new User();
             user.UserName = request.UserName;
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
@@ -44,40 +47,11 @@ namespace Authenticatie.Controllers
                 return BadRequest("Password is wrong");
             }
 
-            string token = CreateToken(user);
+            string token = _encryptionService.CreateToken(user);
             return Ok(token);
         }
 
-        private string CreateToken(User user)
-        {
-            List<Claim> claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, user.UserName)
-            };
 
-            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
-                _configuration.GetSection("AppSettings:Token").Value));
-
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
-
-            var token = new JwtSecurityToken(
-                claims: claims,
-                expires: DateTime.Now.AddDays(1),
-                signingCredentials: creds);
-
-            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
-
-            return jwt;
-        }
-
-        private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
-        {
-            using (var hmac = new HMACSHA512())
-            {
-                passwordSalt = hmac.Key; //public key
-                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password)); //gaat wachtwoord hashen
-            }
-        }
         private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
         {
             using(var hmac = new HMACSHA512(passwordSalt))
