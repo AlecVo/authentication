@@ -7,5 +7,6 @@
         public byte[] PasswordSalt { get; set; }
         public byte[] BerichtHash { get; set; }
         public byte[] BerichtSalt { get; set; }
+        public string PublicKey { get; set; }
     }
 }
