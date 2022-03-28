@@ -52,11 +52,11 @@ namespace Authenticatie.Controllers
         }
 
 
-        private bool VerifyPasswordHash(byte[] passwordHash, byte[] passwordSalt)
+        private bool VerifyPasswordHash(byte[] passwordHash, byte[] passwordSalt,string password)
         {
             using(var hmac = new HMACSHA512(passwordSalt))
             {
-                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(bericht));
+                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
                 return computedHash.SequenceEqual(passwordHash); //SequenceEqual is letterlijk hetzelfde als ==, als het gehashed wachtwoord het zelfde is als het opgeslagen wachtwoord return true ander is het false
             }
         }
