@@ -15,6 +15,7 @@ namespace Authenticatie.Services
         public string CreateToken(Bericht bericht);
         public void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt);
         public void CreateBerichtHash(string bericht, out byte[] berichtHash, out byte[] berichtSalt);
+        public void DecodeToken(string token);
     }
     // is de interface dit wou zeggen dat men dit overal in elke applicatie kan gebruiken as men EncriptionService definieert.
 
@@ -53,7 +54,7 @@ namespace Authenticatie.Services
         {
             using (var hmac = new HMACSHA512())
             {
-                passwordSalt = hmac.Key; //public key
+                passwordSalt = hmac.Key; //key voor gegevens
                 passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password)); //gaat wachtwoord hashen
             }
         }
@@ -61,9 +62,16 @@ namespace Authenticatie.Services
         {
             using (var hmac = new HMACSHA512())
             {
-                berichtSalt = hmac.Key; //public key
-                berichtHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(bericht)); //gaat wachtwoord hashen
+                berichtSalt = hmac.Key; //key voor gegevens
+                berichtHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(bericht)); //gaat bericht hashen
             }
+        }
+        public void DecodeToken(string token)
+        {
+            var stream = "token";
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadToken(stream);
+            var tokens = jsonToken as JwtSecurityToken;
         }
     }
 }
