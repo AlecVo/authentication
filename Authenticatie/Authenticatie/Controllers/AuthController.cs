@@ -26,14 +26,16 @@ namespace Authenticatie.Controllers
         [HttpPost("register")] //registreert persoon en hashed het wachtwoord
         public async Task<ActionResult<Bericht>> Register(BerichtDto request)
         {
+            string token = _encryptionService.CreateToken(bericht);
+
             if (request.WantPassword == true)
             {
                 _encryptionService.CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt); // gaat het wachtwoord opvragen dat in gegeven is.
                 bericht.BerichtInfo = request.BerichtInfo; //gaat het bericht opvragen dat ingegeven is.
                 bericht.PasswordHash = passwordHash;
                 bericht.PasswordSalt = passwordSalt;
+                bericht.PublicKey = token;
 
-                return Ok(bericht);
             }
             else
             {
@@ -41,26 +43,36 @@ namespace Authenticatie.Controllers
                 bericht.BerichtInfo = request.BerichtInfo; //gaat het bericht opvragen dat ingegeven is.
                 bericht.BerichtHash = berichtHash;
                 bericht.BerichtSalt = berichtSalt;
-
-                return Ok(bericht);
+                bericht.PublicKey = token;
+ 
             }
+
+            
+            return Ok(bericht);
 
         }
 
         [HttpPost("Login")]// login zoekt op naam 
         public async Task<ActionResult<string>> Login(BerichtDto request)
         {
-            if (bericht.BerichtInfo != request.BerichtInfo)
+            if (request.WantPassword == true)
             {
-                return BadRequest("User Not found.");
+                if (!VerifyPasswordHash(request.Password, bericht.PasswordHash, bericht.PasswordSalt))
+                {
+                    return BadRequest("Password is wrong");
+                }
+                else
+                {
+                    return Ok();
+                }
             }
-            if (!VerifyPasswordHash(request.Password, bericht.PasswordHash, bericht.PasswordSalt))
+            else
             {
-                return BadRequest("Password is wrong");
+
+                return Ok();
             }
 
-            string token = _encryptionService.CreateToken(bericht);
-            return Ok(token);
+
         }
 
 
