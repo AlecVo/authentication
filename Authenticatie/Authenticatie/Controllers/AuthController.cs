@@ -35,6 +35,15 @@ namespace Authenticatie.Controllers
 
                 return Ok(bericht);
             }
+            else
+            {
+                _encryptionService.CreateBerichtHash(request.BerichtInfo, out byte[] berichtHash, out byte[] berichtSalt); // gaat het bericht opvragen dat in gegeven is.
+                bericht.BerichtInfo = request.BerichtInfo; //gaat het bericht opvragen dat ingegeven is.
+                bericht.BerichtHash = berichtHash;
+                bericht.BerichtSalt = berichtSalt;
+
+                return Ok(bericht);
+            }
 
         }
 
