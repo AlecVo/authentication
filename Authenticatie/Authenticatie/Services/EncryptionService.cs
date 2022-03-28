@@ -12,9 +12,12 @@ namespace Authenticatie.Services
 {
     public interface IEncryption
     {
-        public string CreateToken(User user);
+        public string CreateToken(Bericht bericht);
         public void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt);
+        public void CreateBerichtHash(string bericht, out byte[] passwordHash, out byte[] passwordSalt);
     }
+    // is de interface dit wou zeggen dat men dit overal in elke applicatie kan gebruiken as men EncriptionService definieert.
+
     public class EncryptionService : IEncryption
     {
         private readonly IConfiguration _configuration;
@@ -23,11 +26,12 @@ namespace Authenticatie.Services
         {
             _configuration = configuration;
         }
-        public string CreateToken(User user)
+        //?
+        public string CreateToken(Bericht bericht)
         {
             List<Claim> claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.UserName)
+                new Claim(ClaimTypes.Name, bericht.BerichtInfo)
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
@@ -51,6 +55,14 @@ namespace Authenticatie.Services
             {
                 passwordSalt = hmac.Key; //public key
                 passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password)); //gaat wachtwoord hashen
+            }
+        }
+        public void CreateBerichtHash(string bericht, out byte[] passwordHash, out byte[] passwordSalt)
+        {
+            using (var hmac = new HMACSHA512())
+            {
+                passwordSalt = hmac.Key; //public key
+                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(bericht)); //gaat wachtwoord hashen
             }
         }
     }

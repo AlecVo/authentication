@@ -13,7 +13,7 @@ namespace Authenticatie.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-       
+        public static Bericht bericht = new Bericht();
         private IEncryption _encryptionService;
 
         public AuthController(IEncryption encryptionService)
@@ -24,30 +24,33 @@ namespace Authenticatie.Controllers
 
 
         [HttpPost("register")] //registreert persoon en hashed het wachtwoord
-        public async Task<ActionResult<User>> Register(UserDto request)
+        public async Task<ActionResult<Bericht>> Register(BerichtDto request)
         {
-            _encryptionService.CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
-            User user = new User();
-            user.UserName = request.UserName;
-            user.PasswordHash = passwordHash;
-            user.PasswordSalt = passwordSalt;
+            if (request.WantPassword == true)
+            {
+                _encryptionService.CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt); // gaat het wachtwoord opvragen dat in gegeven is.
+                bericht.BerichtInfo = request.BerichtInfo; //gaat het bericht opvragen dat ingegeven is.
+                bericht.PasswordHash = passwordHash;
+                bericht.PasswordSalt = passwordSalt;
 
-            return Ok(user);
+                return Ok(bericht);
+            }
+
         }
 
         [HttpPost("Login")]// login zoekt op naam 
-        public async Task<ActionResult<string>> Login(UserDto request)
+        public async Task<ActionResult<string>> Login(BerichtDto request)
         {
-            if (user.UserName != request.UserName)
+            if (bericht.BerichtInfo != request.BerichtInfo)
             {
                 return BadRequest("User Not found.");
             }
-            if (!VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
+            if (!VerifyPasswordHash(request.Password, bericht.PasswordHash, bericht.PasswordSalt))
             {
                 return BadRequest("Password is wrong");
             }
 
-            string token = _encryptionService.CreateToken(user);
+            string token = _encryptionService.CreateToken(bericht);
             return Ok(token);
         }
 

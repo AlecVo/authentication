@@ -1,8 +1,8 @@
 ﻿namespace Authenticatie.Models
 {
-    public class User
+    public class Bericht
     {
-        public string UserName { get; set; } = string.Empty;
+        public string BerichtInfo { get; set; } = string.Empty;
         public byte[] PasswordHash { get; set; }
         public byte[] PasswordSalt { get; set; }
     }
