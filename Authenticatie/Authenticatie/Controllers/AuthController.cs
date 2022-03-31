@@ -52,24 +52,36 @@ namespace Authenticatie.Controllers
         }
 
         [HttpPost("Login")]// login zoekt op naam 
-        public async Task<ActionResult<string>> Login(BerichtDto request)
+        public async Task<ActionResult<string>> Login(BerichtOpvragen request)
         {
             if (request.WantPassword == true)
             {
-                if (!VerifyPasswordHash(request.Password, bericht.PasswordHash, bericht.PasswordSalt))
+                if (bericht.PasswordSalt == request.PasswordSalt )
                 {
-                    return BadRequest("Password is wrong");
+                    if (!VerifyPasswordHash(request.Password, bericht.PasswordHash, bericht.PasswordSalt))
+                    {
+                        return BadRequest("Password is wrong");
+                    }
+                    else
+                    {
+                        return Ok(bericht.PublicKey);
+                    }
                 }
                 else
                 {
-                    return Ok();
+                    return BadRequest("PasswordSalt is fout");
                 }
+
             }
             else
             {
-
-                return Ok();
+                if (bericht.PasswordSalt == request.PasswordSalt)
+                {
+                    return Ok(bericht.PublicKey);
+                }
+                    
             }
+            return BadRequest("iets is misgegaan denk ik ");
 
 
         }
@@ -81,6 +93,13 @@ namespace Authenticatie.Controllers
             {
                 var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
                 return computedHash.SequenceEqual(passwordHash); //SequenceEqual is letterlijk hetzelfde als ==, als het gehashed wachtwoord het zelfde is als het opgeslagen wachtwoord return true ander is het false
+            }
+        }
+        public void berichtDto(BerichtOpvragen request, BerichtDto dto)
+        {
+            if (dto.)
+            {
+
             }
         }
     }
